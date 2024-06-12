@@ -108,28 +108,29 @@ int main()
     return 0;
 }
 
-void Backup()
+void Backup(List *list)
 {
     string products, rate, quantity;
-    ifstream storage;
     ofstream backup;
 
+    Product *iterator = list->getHead();
     backup.open("BackUp.txt", ios::out);
-    storage.open("Inventory.txt");
 
-    if (!backup || !storage)
+
+    if (!backup)
     {
         cout << "Error in opening the file...";
     }
 
-    while (storage >> products >> rate >> quantity)
+    do
     {
-        backup << setw(15) << products << setw(15) << rate << setw(15) << quantity << endl;
-    }
+        backup << setw(15) << iterator->getName() << setw(15) << iterator->getRate() << setw(15) << iterator->getQuantity() << endl;
+        iterator = iterator->getNext();
+
+    } while (iterator->getNext() != nullptr);
 
     cout << "Backup created succesfully..." << endl;
     backup.close();
-    storage.close();
 }
 
 void Intro()

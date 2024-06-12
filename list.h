@@ -103,4 +103,16 @@ public:
             }
         }
     }
+
+    ~List()
+    {
+
+        while (head != nullptr)
+        {
+            Product *iterator = head;
+            head = head->getNext();
+
+            delete iterator;
+        }
+    }
 };

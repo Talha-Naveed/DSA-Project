@@ -8,17 +8,18 @@ void Intro();
 void MainMenu();
 void InventoryMenu();
 void Backup();
-void viewInventory();
-void addInventory();
-void sellInventory();
-void changeProductRate();
-void changeProductQuantity();
-void SearchItem();
+void addInventory(List *list);
+void sellInventory(List *list);
+void changeProductRate(List *list);
+void changeProductQuantity(List *list);
+void SearchItem(List *list);
+Product *objFinder(List *list, const char Name[10]);
 
 int main()
 {
     Intro();
     int choice;
+    List *newList = new List();
 
     do
     {
@@ -41,42 +42,42 @@ int main()
             {
                 // Code to view inventory
                 system("CLS");
-                viewInventory();
+                newList->Print();
                 break;
             }
             case 2:
             {
                 // Code to add inventory
                 system("CLS");
-                addInventory();
+                addInventory(newList);
                 break;
             }
             case 3:
             {
                 // Code to sell inventory
                 system("CLS");
-                sellInventory();
+                sellInventory(newList);
                 break;
             }
             case 4:
             {
                 // Code to search specific item
                 system("CLS");
-                SearchItem();
+                SearchItem(newList);
                 break;
             }
             case 5:
             {
                 // code to change product rate
                 system("CLS");
-                changeProductRate();
+                changeProductRate(newList);
                 break;
             }
             case 6:
             {
                 // Code to change product quantity
                 system("CLS");
-                changeProductQuantity();
+                changeProductQuantity(newList);
                 break;
             }
             case 7:
@@ -103,6 +104,7 @@ int main()
         }
     } while (choice != 2);
 
+    delete newList;
     return 0;
 }
 
@@ -165,244 +167,84 @@ void InventoryMenu()
     cout << "--------------------------------------------------\n";
 }
 
-void viewInventory()
+void addInventory(List *list)
 {
-    ifstream inventory;
-    string product, rate, quantity;
-    inventory.open("Inventory.txt", ios::in);
-    if (!inventory)
-    {
-        cout << "Inventory file not found!\n";
-        return;
-    }
+    char Name[10];
+    double Rate;
+    int Quantity;
 
-    while (!inventory.eof())
-    {
-        inventory >> product >> rate >> quantity;
-        cout << setw(15) << product << setw(15) << rate << setw(15) << quantity << endl;
-    }
+    cout << "Enter a value for Product Name : ";
+    cin >> Name;
+    cout << "Enter a value for Product Rate : ";
+    cin >> Rate;
+    cout << "Enter a value for Product Quantity : ";
+    cin >> Quantity;
 
-    inventory.close();
+    list->Add(Name, Rate, Quantity);
+
+    system("CLS");
+    cout << "Product Added Successfuly!!\n";
 }
 
-void addInventory()
+Product *objFinder(List *list, const char Name[10])
 {
-    ofstream inventory;
+    Product *product = list->getHead();
+    while (!strcmp(product->getName(), Name))
+    {
+        product = product->getNext();
+    }
+
+    return product;
+}
+void sellInventory(List *list)
+{
     char productName[10];
-    double productRate;
-    int productQuantity;
-
-    inventory.open("Inventory.txt", ios::app);
-    if (!inventory)
-    {
-        cout << "Error opening inventory file!\n";
-        return;
-    }
-
-    Product product;
-    cout << "Enter product details:\n";
-    cout << "Product: ";
+    int Quantity;
+    cout << "Enter a value for Product Name : ";
     cin >> productName;
-    product.setName(productName);
+    cout << "Enter a value for quantity : ";
+    cin >> Quantity;
 
-    cout << "Rate: ";
-    cin >> productRate;
-    product.setRate(productRate);
+    Product *theProduct = objFinder(list, productName);
 
-    cout << "Quantity: ";
-    cin >> productQuantity;
-    product.setQuantity(productQuantity);
-
-    inventory << endl
-              << setw(15) << product.getName() << setw(15) << product.getRate() << setw(15) << product.getQuantity();
-    inventory.close();
-    cout << "Inventory added successfully!\n";
+    list->Delete(theProduct, Quantity);
 }
 
-void sellInventory()
+void changeProductRate(List *list)
 {
-    string product;
-    int quantity;
-    ifstream inventory;
-    ofstream temp;
-    inventory.open("Inventory.txt", ios::in);
-    temp.open("Temp.txt", ios::out);
-    if (!inventory || !temp)
-    {
-        cout << "Error opening inventory files!\n";
-        return;
-    }
+    char productName[10];
+    double Rate;
+    cout << "Enter a value for Product Name : ";
+    cin >> productName;
+    cout << "Enter a value for Rate : ";
+    cin >> Rate;
 
-    cout << "Enter the product you want to sell: ";
-    cin >> product;
-    cout << "Enter the quantity to sell: ";
-    cin >> quantity;
+    Product *theProduct = objFinder(list, productName);
 
-    string p, r, q;
-    bool found = false;
-    while (!inventory.eof())
-    {
-        inventory >> p >> r >> q;
-        if (p == product)
-        {
-            found = true;
-            int oldQuantity = stoi(q);
-            if (quantity > oldQuantity)
-            {
-                cout << "Not enough quantity available!\n";
-                temp << setw(15) << p << setw(15) << r << setw(15) << q;
-            }
-            else
-            {
-                int newQuantity = oldQuantity - quantity;
-                temp << setw(15) << p << setw(15) << r << setw(15) << newQuantity;
-                cout << "Inventory sold successfully!\n";
-            }
-        }
-        else
-        {
-            temp << setw(15) << p << setw(15) << r << setw(15) << q << endl;
-        }
-    }
-
-    inventory.close();
-    temp.close();
-
-    if (!found)
-    {
-        cout << "Product not found in inventory!\n";
-    }
-    else
-    {
-        remove("Inventory.txt");
-        rename("Temp.txt", "Inventory.txt");
-    }
+    theProduct->setRate(Rate);
 }
 
-void changeProductRate()
+void changeProductQuantity(List *list)
 {
-    ifstream inventory;
-    ofstream temp;
-    inventory.open("Inventory.txt", ios::in);
-    temp.open("Temp.txt", ios::out);
-    if (!inventory || !temp)
-    {
-        cout << "Error opening inventory files!\n";
-        return;
-    }
+    char productName[10];
+    int Quantity;
+    cout << "Enter a value for Product Name : ";
+    cin >> productName;
+    cout << "Enter a value for quantity : ";
+    cin >> Quantity;
 
-    string product;
-    double newRate;
-    cout << "Enter the product for which you want to change the rate: ";
-    cin >> product;
-    cout << "Enter the new rate: ";
-    cin >> newRate;
+    Product *theProduct = objFinder(list, productName);
 
-    string p, r, q;
-    bool found = false;
-    while (!inventory.eof())
-    {
-        inventory >> p >> r >> q;
-        if (p == product)
-        {
-            found = true;
-            temp << setw(15) << p << setw(15) << newRate << setw(15) << q;
-            cout << "Rate changed successfully!\n";
-        }
-        else
-        {
-            temp << setw(15) << p << setw(15) << r << setw(15) << q;
-        }
-    }
-
-    inventory.close();
-    temp.close();
-
-    if (!found)
-    {
-        cout << "Product not found in inventory!\n";
-    }
-    else
-    {
-        remove("Inventory.txt");
-        rename("Temp.txt", "Inventory.txt");
-    }
+    theProduct->setQuantity(Quantity);
 }
 
-void changeProductQuantity()
+void SearchItem(List *list)
 {
-    ifstream inventory;
-    ofstream temp;
-    inventory.open("Inventory.txt", ios::in);
-    temp.open("Temp.txt", ios::out);
-    if (!inventory || !temp)
-    {
-        cout << "Error opening inventory files!\n";
-        return;
-    }
+    char Name[10];
 
-    string product;
-    int newQuantity;
-    cout << "Enter the product for which you want to change the rate: ";
-    cin >> product;
-    cout << "Enter the new Quantity: ";
-    cin >> newQuantity;
+    cout << "Enter a value for Product Name : ";
+    cin >> Name;
 
-    string p, r, q;
-    bool found = false;
-    while (!inventory.eof())
-    {
-        inventory >> p >> r >> q;
-        if (p == product)
-        {
-            found = true;
-            temp << setw(15) << p << setw(15) << r << setw(15) << newQuantity;
-            cout << "Rate changed successfully!\n";
-        }
-        else
-        {
-            temp << setw(15) << p << setw(15) << r << setw(15) << q;
-        }
-    }
-
-    inventory.close();
-    temp.close();
-
-    if (!found)
-    {
-        cout << "Product not found in inventory!\n";
-    }
-    else
-    {
-        remove("Inventory.txt");
-        rename("Temp.txt", "Inventory.txt");
-    }
-}
-
-void SearchItem()
-{
-    ifstream inventory;
-    inventory.open("Inventory.txt", ios::in);
-    if (!inventory)
-    {
-        cout << "Error opening inventory files!\n";
-        return;
-    }
-
-    string product;
-    cout << "Enter the product whose rate you wanted to know  : ";
-    cin >> product;
-
-    string p, r, q;
-    bool found = false;
-    while (!inventory.eof())
-    {
-        inventory >> p >> r >> q;
-        if (p == product)
-        {
-            cout << setw(15) << p << setw(15) << r << setw(15) << q << endl;
-        }
-    }
-
-    inventory.close();
+    Product *theProduct = objFinder(list, Name);
+    cout << theProduct->getName() << setw(15) << theProduct->getRate() << setw(15) << theProduct->getQuantity() << endl;
 }

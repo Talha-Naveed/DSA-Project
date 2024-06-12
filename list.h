@@ -60,7 +60,7 @@ public:
     }
 
     // Function to delete an item from the list
-    void Delete(const char Name[10])
+    void Delete(Product *product, int Quantity)
     {
         // Case 1. List is empty
         if (head == nullptr)
@@ -70,21 +70,37 @@ public:
         // Case 2. List is non-empty
         else
         {
-            // Case 2-A Element is head element
-            if(strcmp(Name, head->getName()))
+            product->setQuantity(product->getQuantity() - Quantity);
+            if (product->getQuantity() <= 0)
             {
-                
-            }
-            Product *iterator = head;
-            Product *previous = head;
-
-            do
-            {
-                if (strcmp(Name, iterator->getName()))
+                // Case 2-A Element is head element
+                if (strcmp(product->getName(), head->getName()))
                 {
-
+                    Product *temp = head;
+                    head = head->getNext();
+                    temp->setNext(nullptr); // To avoid dangling pointer
+                    delete temp;
                 }
-            } while (iterator->getNext() != nullptr);
+                else
+                {
+                    // Case 2-B. Element is non head element
+                    Product *iterator = head->getNext();
+                    Product *previous = head;
+
+                    do
+                    {
+                        if (strcmp(product->getName(), iterator->getName()))
+                        {
+                            previous->setNext(iterator->getNext());
+                            delete iterator;
+                            return;
+                        }
+                        previous = iterator;
+                        iterator = iterator->getNext();
+
+                    } while (iterator->getNext() != nullptr);
+                }
+            }
         }
     }
 };
